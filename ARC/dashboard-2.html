@@ -1,0 +1,321 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>SM ARC</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--navy:#1a3a6b;--navy-dark:#122850;--navy-light:#2a4f8f;--teal:#00a99d;--teal-light:#00c9bb;--teal-bg:#e8f8f7;--silver:#8fa3b8;--silver-bg:#f4f7fa;--white:#fff;--text:#1a2940;--text-2:#3d5474;--text-3:#7a93ad;--border:#d8e5ef;--alto:#e8365d;--alto-bg:#fdeef2;--medio:#d4860a;--medio-bg:#fef6e7;--bajo:#00a99d;--bajo-bg:#e8f8f7;--shadow-sm:0 1px 4px rgba(26,58,107,.07);--shadow:0 4px 16px rgba(26,58,107,.10);--radius:12px;--radius-sm:8px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--silver-bg);color:var(--text);font-size:13px;}
+.header{display:flex;align-items:center;padding:0 24px;height:64px;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(26,58,107,.06);}
+.logo-block{display:flex;align-items:center;gap:10px;flex-shrink:0;}.logo-eye{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--navy),var(--navy-light));display:flex;align-items:center;justify-content:center;font-size:18px;}.logo-name{font-size:15px;font-weight:800;letter-spacing:-0.5px;color:var(--navy);}.logo-sub{font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace;margin-top:1px;}.h-div{width:1px;height:32px;background:var(--border);margin:0 16px;}.header-title{font-size:12px;font-weight:600;color:var(--text-2);}
+.header-badge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;background:var(--silver-bg);color:var(--navy);border:1px solid var(--border);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}.pulse{animation:pulse 2s infinite;}
+.layout{display:flex;height:calc(100vh - 64px);overflow:hidden;}
+.sidebar{width:216px;min-width:216px;background:var(--white);border-right:1px solid var(--border);padding:18px 8px;overflow-y:auto;}
+.nav-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);padding:14px 12px 6px;}
+.nav-item{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border:none;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text-2);transition:all 0.15s;text-align:left;border-radius:var(--radius-sm);}
+.nav-item:hover{background:var(--silver-bg);color:var(--navy);}
+.nav-item.active{background:linear-gradient(135deg,var(--navy),var(--navy-light));color:white;font-weight:600;}
+.main{flex:1;overflow-y:auto;padding:22px 28px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.view{display:none;}.view.active{display:block;animation:fadeUp 0.25s ease;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px;}
+.kpi{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s;}
+.kpi:hover{box-shadow:var(--shadow);}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.k-navy::after{background:linear-gradient(90deg,var(--navy),var(--navy-light));}
+.kpi.k-alto::after{background:var(--alto);}
+.kpi.k-medio::after{background:var(--medio);}
+.kpi.k-bajo::after{background:var(--teal);}
+.kpi.k-teal::after{background:linear-gradient(90deg,var(--teal),var(--teal-light));}
+.kpi-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);}
+.kpi-val{font-size:clamp(18px,2.2vw,26px);font-weight:800;letter-spacing:-1px;margin-top:4px;}
+.kpi-sub{font-size:11px;color:var(--text-3);margin-top:4px;}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.chart-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow-sm);}
+.chart-card h3{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.chart-wrap{position:relative;height:180px;}
+.tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.tbl th{background:var(--silver-bg);padding:8px 10px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1;}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);}
+.tbl tr:hover{background:rgba(0,169,157,0.04);}
+.badge{padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;}
+.b-alto{background:var(--alto-bg);color:var(--alto);}.b-medio{background:var(--medio-bg);color:var(--medio);}.b-bajo{background:var(--bajo-bg);color:var(--bajo);}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;}.d-a{background:var(--alto);}.d-m{background:var(--medio);}.d-b{background:var(--teal);}
+.filters-bar{display:flex;align-items:center;gap:8px;padding:10px 0;flex-wrap:wrap;margin-bottom:10px;}
+.chip{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);background:white;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;}
+.chip.on{background:var(--navy);color:white;border-color:var(--navy);}
+.chip-a.on{background:var(--alto);color:white;border-color:var(--alto);}
+.chip-m.on{background:var(--medio);color:white;border-color:var(--medio);}
+.chip-b.on{background:var(--teal);color:white;border-color:var(--teal);}
+input[type=text]{padding:6px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;width:220px;}
+.status-bar{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);padding:4px 0 12px;letter-spacing:0.5px;}
+.section-title{font-size:14px;font-weight:800;color:var(--navy);margin:18px 0 12px;letter-spacing:-0.3px;}
+footer{margin-top:28px;padding:12px 0;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:9px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;}
+@media(max-width:900px){.sidebar{width:180px;min-width:180px;}.main{padding:16px 18px;}}
+@media(max-width:768px){.layout{flex-direction:column;}.sidebar{width:100%;min-width:unset;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:8px;display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;}.nav-label{display:none;}.nav-item{flex-shrink:0;padding:8px 12px;}.main{padding:12px 14px;}.chart-grid{grid-template-columns:1fr;}}
+.dd-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;gap:0;}.dd-tab{padding:8px 18px;border:none;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;}.dd-tab.active{color:var(--navy);border-bottom-color:var(--navy);}.dd-tab:hover:not(.active){color:var(--navy);}.dd-panel{display:none;}.dd-panel.active{display:block;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin-bottom:4px;}.info-item{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-bottom:1px solid var(--border);}.info-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);}.info-val{font-size:12px;font-weight:600;color:var(--text);}
+.mgmt-bar{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;}.mgmt-bar-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}.mgmt-track{height:10px;border-radius:5px;background:var(--silver-bg);display:flex;overflow:hidden;}.mgmt-seg-conf{background:var(--alto);height:100%;transition:width 0.4s;}.mgmt-seg-desc{background:var(--teal);height:100%;transition:width 0.4s;}.mgmt-legend{display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--text-2);flex-wrap:wrap;}.mgmt-legend-item{display:flex;align-items:center;gap:5px;}.mgmt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.insight-box{background:var(--silver-bg);border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;font-size:12px;color:var(--text-2);line-height:1.7;}
+.society-bar{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:6px 0 4px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;width:100%;margin-bottom:4px;}
+.society-bar::-webkit-scrollbar{height:3px;}.society-bar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.soc-chip{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;border:1.5px solid var(--border);background:white;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap;transition:all 0.15s;flex-shrink:0;letter-spacing:0.5px;}
+.soc-chip:hover{border-color:var(--navy);color:var(--navy);}.soc-chip.active{background:var(--navy);color:white;border-color:var(--navy);}
+</style></head><body>
+<div class="header">
+<div class="logo-block"><img src="/logo_sm.png" style="width:34px;height:34px;border-radius:8px;object-fit:contain;" alt="SM"><div><div class="logo-name">SM</div><div class="logo-sub">ARC · Riesgo de Contraparte</div></div></div>
+<div class="h-div"></div>
+<div class="header-title">Análisis de Riesgo de Contraparte</div>
+<div style="display:flex;gap:8px;align-items:center;margin-left:auto;"><span class="header-badge pulse" id="h-alto"></span><span class="header-badge" id="h-total"></span></div>
+</div>
+<div class="layout">
+<div class="sidebar">
+<div class="nav-label">Análisis</div>
+<button class="nav-item active" onclick="goTo('resumen',this)"><span>🎯</span>Resumen Ejecutivo</button>
+<button class="nav-item" onclick="goTo('alertas',this)"><span>🚨</span>Alertas A1–A5</button>
+<div class="nav-label" style="margin-top:6px;">Gestión</div>
+<button class="nav-item" onclick="goTo('clientes',this)"><span>👥</span>Clientes</button>
+<button class="nav-item" onclick="goTo('sociedades',this)"><span>🏢</span>Por Sociedad</button>
+<button class="nav-item" onclick="goTo('representantes',this)"><span>🔎</span>Representantes</button>
+<div class="nav-label" style="margin-top:6px;">Sistema</div>
+<button class="nav-item" onclick="goTo('guia',this)"><span>📖</span>Guía del Sistema</button>
+</div>
+<div class="main">
+<div class="filters-bar">
+<span class="chip on" onclick="toggleRisk('all',this)">Todos</span>
+<span class="chip chip-a" onclick="toggleRisk('ALTO',this)">🔴 Alto</span>
+<span class="chip chip-m" onclick="toggleRisk('MEDIO',this)">🟡 Medio</span>
+<span class="chip chip-b" onclick="toggleRisk('BAJO',this)">🟢 Bajo</span>
+<input type="text" id="search-box" placeholder="Buscar cliente, CIIU, país..." oninput="applyFilters()">
+</div>
+<div class="society-bar" id="soc-bar"></div>
+<div class="status-bar" id="status-bar">Cargando datos...</div>
+
+<div id="view-resumen" class="view active">
+<div class="kpi-grid" id="kpi-resumen"></div>
+<div class="mgmt-bar" id="arc-mgmt-bar">
+<div class="mgmt-bar-title"><span>GESTIÓN DE EXPEDIENTES</span><span id="arc-mgmt-pct">0% gestionado</span></div>
+<div class="mgmt-track"><div class="mgmt-seg-conf" id="arc-mgmt-conf-bar" style="width:0%"></div><div class="mgmt-seg-desc" id="arc-mgmt-desc-bar" style="width:0%"></div></div>
+<div class="mgmt-legend"><div class="mgmt-legend-item"><div class="mgmt-dot" style="background:var(--alto)"></div><span id="arc-mgmt-conf-lbl">Confirmados: 0</span></div><div class="mgmt-legend-item"><div class="mgmt-dot" style="background:var(--teal)"></div><span id="arc-mgmt-desc-lbl">Descartados: 0</span></div><div class="mgmt-legend-item"><div class="mgmt-dot" style="background:var(--border)"></div><span id="arc-mgmt-pend-lbl">Pendientes: —</span></div></div>
+</div>
+<div class="insight-box" id="arc-insight">Cargando análisis...</div>
+<div class="chart-grid">
+<div class="chart-card"><h3>📊 Distribución de Riesgo</h3><div class="chart-wrap"><canvas id="c-donut"></canvas></div></div>
+<div class="chart-card"><h3>🚨 Alertas A1–A5 por Nivel</h3><div class="chart-wrap"><canvas id="c-alertas"></canvas></div></div>
+</div>
+<div class="chart-grid">
+<div class="chart-card"><h3>🌍 Top Países en Riesgo Alto</h3><div class="chart-wrap"><canvas id="c-paises"></canvas></div></div>
+<div class="chart-card"><h3>🏢 Distribución por Sociedad</h3><div class="chart-wrap"><canvas id="c-sociedad"></canvas></div></div>
+</div>
+</div>
+
+<div id="view-alertas" class="view">
+<div class="kpi-grid" id="kpi-alertas"></div>
+<div class="chart-grid">
+<div class="chart-card"><h3>📈 Frecuencia por Alerta</h3><div class="chart-wrap"><canvas id="c-freq"></canvas></div></div>
+<div class="chart-card"><h3>🎯 Combinaciones más frecuentes (ALTO)</h3><div class="chart-wrap"><canvas id="c-combo"></canvas></div></div>
+</div>
+</div>
+
+<div id="view-clientes" class="view">
+<div class="kpi-grid" id="kpi-clientes"></div>
+<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:auto;max-height:45vh;">
+<table class="tbl"><thead><tr>
+<th>#</th><th>Código</th><th>Razón Social</th><th>País</th><th>Sociedad</th><th>Días</th><th>CIIU</th><th>A1</th><th>A2</th><th>A3</th><th>A4</th><th>A5</th><th>#A</th><th>Riesgo</th><th>Estado</th><th></th>
+</tr></thead><tbody id="tbl-clientes"></tbody></table>
+</div>
+<div id="arc-drilldown" style="display:none;margin-top:14px;background:white;border:1px solid var(--border);border-radius:var(--radius);padding:18px;">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+<div><strong id="arc-dd-nombre" style="font-size:14px;color:var(--navy);display:block;"></strong><span id="arc-dd-meta" style="font-size:11px;color:var(--text-3);margin-top:2px;display:block;"></span></div>
+<button onclick="closeArcDD()" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 12px;cursor:pointer;font-size:11px;flex-shrink:0;margin-left:12px;">✕ Cerrar</button>
+</div>
+<div id="arc-dd-alertas" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+<div class="dd-tabs">
+<button class="dd-tab active" onclick="arcTab('info')">📋 Info</button>
+<button class="dd-tab" onclick="arcTab('intervencion')">✍️ Intervención</button>
+<button class="dd-tab" onclick="arcTab('exportar')">📄 Exportar</button>
+</div>
+<div id="arc-panel-info" class="dd-panel active"><div class="info-grid" id="arc-info-grid"></div></div>
+<div id="arc-panel-intervencion" class="dd-panel">
+<div style="margin-bottom:12px;"><span id="arc-dd-status" style="font-size:13px;font-weight:700;">⏳ Pendiente</span></div>
+<div style="display:flex;gap:10px;margin-bottom:14px;">
+<button onclick="setArcDec('Confirmado')" id="arc-btn-conf" style="flex:1;padding:10px;border-radius:var(--radius-sm);border:2px solid var(--alto);background:white;color:var(--alto);font-weight:700;font-size:12px;cursor:pointer;">✅ Confirmar riesgo</button>
+<button onclick="setArcDec('Descartado')" id="arc-btn-desc" style="flex:1;padding:10px;border-radius:var(--radius-sm);border:2px solid var(--teal);background:white;color:var(--teal);font-weight:700;font-size:12px;cursor:pointer;">🚫 Descartar riesgo</button>
+</div>
+<button onclick="setArcDec('')" id="arc-btn-undo" style="display:none;margin-bottom:12px;padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:white;font-size:11px;cursor:pointer;">↩ Deshacer decisión</button>
+<textarea id="arc-obs" placeholder="Observación del analista..." style="width:100%;height:120px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;resize:vertical;"></textarea>
+</div>
+<div id="arc-panel-exportar" class="dd-panel">
+<p style="font-size:12px;color:var(--text-2);margin-bottom:14px;line-height:1.6;">Genera el expediente SAGRILAFT de este cliente con el estado actual de la decisión y la observación del analista.</p>
+<div style="background:var(--silver-bg);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;"><div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px;">Ruta de guardado</div><span id="arc-export-ruta" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-2);"></span></div>
+<button id="arc-btn-export" onclick="exportArcIndividual()" style="padding:10px 24px;border-radius:var(--radius-sm);border:none;background:var(--navy);color:white;font-weight:700;font-size:12px;cursor:pointer;">📄 Exportar Expediente</button>
+</div>
+</div>
+</div>
+
+<div id="view-sociedades" class="view">
+<div class="section-title">Distribución por Sociedad</div>
+<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:auto;max-height:70vh;">
+<table class="tbl"><thead><tr><th>Sociedad</th><th>Nombre</th><th>Alto</th><th>Medio</th><th>Bajo</th><th>Total</th></tr></thead><tbody id="tbl-soc"></tbody></table>
+</div>
+</div>
+
+<div id="view-representantes" class="view">
+<div class="section-title">🔎 Representantes Duplicados (Alerta A3)</div>
+<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:auto;max-height:70vh;">
+<table class="tbl"><thead><tr><th>Representante</th><th>Clientes</th><th>Alto</th><th>Medio</th><th>Bajo</th></tr></thead><tbody id="tbl-rep"></tbody></table>
+</div>
+</div>
+
+<div id="view-guia" class="view">
+<div class="section-title">📖 Guía del Sistema ARC</div>
+<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:24px;line-height:1.8;">
+<p><strong>ARC</strong> (Análisis de Riesgo de Contraparte) evalúa el perfil de los clientes registrados en SAP mediante 5 alertas:</p>
+<ul style="margin:12px 0 12px 20px;">
+<li><strong>A1 — Condición de Pago:</strong> Plazos >90 días = ALTO, 60-90 = MEDIO</li>
+<li><strong>A2 — Coherencia CIIU:</strong> Actividad económica vs sector farmacéutico</li>
+<li><strong>A3 — Representante Duplicado:</strong> Mismo RL en 2+ clientes</li>
+<li><strong>A4 — Empresa Reciente:</strong> Constituida hace menos de 24 meses</li>
+<li><strong>A5 — Riesgo País:</strong> Evaluación GAFI, OFAC, Basilea</li>
+</ul>
+<p><strong>Riesgo Global:</strong> ≥1 ALTO o ≥2 MEDIO → ALTO | 1 MEDIO → MEDIO | Todo BAJO → BAJO</p>
+</div>
+</div>
+<footer>SM v2.0 · ARC · Sofgen Pharma · SAGRILAFT · Confidencial</footer>
+</div></div>
+<script>
+var B={};
+var NL={1:'ALTO',2:'MEDIO',3:'BAJO'};var NLR={ALTO:1,MEDIO:2,BAJO:3};
+var C={Alto:'#e8365d',Medio:'#d4860a',Bajo:'#00a99d',navy:'#1a3a6b'};
+var _donutCenterPlugin={id:'donutCenter',afterDraw:function(chart){if(chart.config.type!=='doughnut')return;var ds=chart.data.datasets[0].data;var total=ds.reduce(function(a,b){return a+b;},0);if(!total)return;var ctx=chart.ctx,ca=chart.chartArea;if(!ca)return;var cx=(ca.left+ca.right)/2,cy=(ca.top+ca.bottom)/2;var label,sub='total';if(total>=1e12){label=(total/1e12).toFixed(1)+' B';sub='COP';}else if(total>=1e9){label=(total/1e9).toFixed(1)+' MM';sub='COP';}else if(total>=1e6){label=(total/1e6).toFixed(1)+' M';}else{label=total.toLocaleString('es-CO');}var avail=(Math.min(ca.right-ca.left,ca.bottom-ca.top)/2)*0.6;ctx.save();ctx.font='bold 16px Plus Jakarta Sans';if(ctx.measureText(label).width>avail*1.8){ctx.font='bold 13px Plus Jakarta Sans';}if(ctx.measureText(label).width>avail*1.8){ctx.font='bold 11px Plus Jakarta Sans';}ctx.fillStyle='#1a3a6b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,cx,cy-7);ctx.font='9px Plus Jakarta Sans';ctx.fillStyle='#7a93ad';ctx.fillText(sub,cx,cy+8);ctx.restore();}};
+Chart.register(_donutCenterPlugin);
+Chart.defaults.color='#7a93ad';Chart.defaults.borderColor='#d8e5ef';
+Chart.defaults.font.family="'Plus Jakarta Sans',sans-serif";Chart.defaults.font.size=11;
+var charts={};var activeRisk='all';var searchTerm='';var activeSociety='all';
+function mkChart(id,type,data,opts){if(charts[id]){charts[id].destroy();}var el=document.getElementById(id);if(!el)return null;charts[id]=new Chart(el,{type:type,data:data,options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:type==='doughnut',position:'bottom',labels:{padding:10,usePointStyle:true,font:{size:10}}}}},opts||{})});return charts[id];}
+function goTo(v,btn){document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active')});document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active')});document.getElementById('view-'+v).classList.add('active');btn.classList.add('active');}
+function toggleRisk(r,el){activeRisk=r;document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on')});el.classList.add('on');applyFilters();}
+function applyFilters(){searchTerm=(document.getElementById('search-box').value||'').toUpperCase();renderAll();}
+function toggleSociety(code){activeSociety=(activeSociety===code)?'all':code;renderSocietyChips();renderAll();}
+function renderSocietyChips(){var bar=document.getElementById('soc-bar');if(!bar)return;var sa=B.sa||[];var h='<span class="soc-chip'+(activeSociety==='all'?' active':'')+'" onclick="toggleSociety(\'all\')">Todas</span>';sa.forEach(function(s){var isA=activeSociety===s[0];h+='<span class="soc-chip'+(isA?' active':'')+'" title="'+s[1].replace(/'/g,'&#39;')+'" onclick="toggleSociety(\''+s[0]+'\')">'+s[0]+'</span>';});bar.innerHTML=h;}
+function filterRows(){var tc=B.tc||[];return tc.filter(function(r){var risk=NL[r[14]]||'BAJO';if(activeRisk!=='all'&&risk!==activeRisk)return false;if(activeSociety!=='all'&&B.so[r[3]]!==activeSociety)return false;if(searchTerm){var rz=B.rz[r[1]]||'';var pa=B.pa[r[2]]||'';var so=B.so[r[3]]||'';var code=r[0];var txt=(code+' '+rz+' '+pa+' '+so).toUpperCase();if(txt.indexOf(searchTerm)<0)return false;}return true;});}
+function fmt(n){return(n||0).toLocaleString('es-CO');}
+function dotH(v){var c=v===1?'d-a':v===2?'d-m':'d-b';return '<span class="dot '+c+'"></span>';}
+function badgeH(v){var n=NL[v]||'BAJO';var c=n==='ALTO'?'b-alto':n==='MEDIO'?'b-medio':'b-bajo';return '<span class="badge '+c+'">'+n+'</span>';}
+var arcDecs={};var arcSel=null;
+try{arcDecs=JSON.parse(localStorage.getItem('arcDecs')||'{}');}catch(e){}
+function saveArcDecs(){localStorage.setItem('arcDecs',JSON.stringify(arcDecs));}
+function arcTab(t){['info','intervencion','exportar'].forEach(function(p){document.getElementById('arc-panel-'+p).classList.toggle('active',p===t);});document.querySelectorAll('.dd-tab').forEach(function(b,i){b.classList.toggle('active',['info','intervencion','exportar'][i]===t);});}
+function openArcDD(code,rz,r){
+arcSel=code;
+document.getElementById('arc-drilldown').style.display='block';
+document.getElementById('arc-dd-nombre').textContent=rz;
+var risk=NL[r[14]]||'BAJO';
+document.getElementById('arc-dd-meta').textContent=risk+' · Código: '+code+' · '+r[4]+' días · CIIU '+r[5];
+var aNames=['A1: Cond. Pago','A2: CIIU','A3: Rep. Dup.','A4: Emp. Reciente','A5: País'];
+var aH='';for(var i=0;i<5;i++){var v=r[8+i];var n=NL[v]||'BAJO';var c=n==='ALTO'?'b-alto':n==='MEDIO'?'b-medio':'b-bajo';aH+='<span class="badge '+c+'" style="padding:4px 12px">'+aNames[i]+': '+n+'</span>';}
+document.getElementById('arc-dd-alertas').innerHTML=aH;
+var ig=document.getElementById('arc-info-grid');
+ig.innerHTML='<div class="info-item"><div class="info-label">Código SAP</div><div class="info-val" style="font-family:DM Mono,monospace">'+code+'</div></div>'
++'<div class="info-item"><div class="info-label">País</div><div class="info-val">'+(B.pa[r[2]]||'—')+'</div></div>'
++'<div class="info-item"><div class="info-label">Sociedad</div><div class="info-val">'+(B.so[r[3]]||'—')+'</div></div>'
++'<div class="info-item"><div class="info-label">Días de Pago</div><div class="info-val">'+r[4]+' días</div></div>'
++'<div class="info-item"><div class="info-label">CIIU</div><div class="info-val" style="font-family:DM Mono,monospace">'+r[5]+'</div></div>'
++'<div class="info-item"><div class="info-label">Actividad Económica</div><div class="info-val">'+(B.dd&&B.dd[r[15]]?B.dd[r[15]]:'—')+'</div></div>'
++'<div class="info-item"><div class="info-label">Representante Legal</div><div class="info-val">'+(B.rn&&B.rn[r[6]]?B.rn[r[6]]:'—')+'</div></div>'
++'<div class="info-item"><div class="info-label">Fecha Constitución</div><div class="info-val">'+r[7]+'</div></div>';
+document.getElementById('arc-obs').value=localStorage.getItem('arc_obs_'+code)||'';
+var dec=arcDecs[code]||'';updateArcDecUI(dec);
+document.getElementById('arc-export-ruta').textContent='SAGRILAFT / Maestro de clientes / '+new Date().getFullYear()+' / '+risk;
+arcTab('info');
+renderAll();
+}
+function closeArcDD(){arcSel=null;document.getElementById('arc-drilldown').style.display='none';renderAll();}
+function setArcDec(dec){
+  if(!arcSel)return;
+  if(dec){
+    var nombre=document.getElementById('arc-dd-nombre').textContent||arcSel;
+    if(!confirm('¿Confirmar decisión "'+dec+'" para el cliente:\n'+nombre+'?\n\nEsta acción quedará registrada en la base de datos de cumplimiento.'))return;
+    arcDecs[arcSel]=dec;
+  }else{delete arcDecs[arcSel];}
+  saveArcDecs();updateArcDecUI(dec);renderAll();
+}
+function updateArcDecUI(dec){
+var s=document.getElementById('arc-dd-status');var bc=document.getElementById('arc-btn-conf');var bd=document.getElementById('arc-btn-desc');var bu=document.getElementById('arc-btn-undo');
+bc.style.background='white';bd.style.background='white';bu.style.display='none';
+if(dec==='Confirmado'){s.textContent='✅ Confirmado';s.style.color='var(--alto)';bc.style.background='var(--alto-bg)';bu.style.display='inline';}
+else if(dec==='Descartado'){s.textContent='🚫 Descartado';s.style.color='var(--teal)';bd.style.background='var(--bajo-bg)';bu.style.display='inline';}
+else{s.textContent='⏳ Pendiente';s.style.color='var(--text-3)';}
+}
+function exportArcIndividual(){
+  if(!arcSel)return;
+  var obs=document.getElementById('arc-obs').value;
+  localStorage.setItem('arc_obs_'+arcSel,obs);
+  var dec=arcDecs[arcSel]||'Pendiente';
+  var btn=document.getElementById('arc-btn-export');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Generando...';}
+  fetch('http://localhost:8081/exportar?tipo=individual&cliente='+encodeURIComponent(arcSel)+'&obs='+encodeURIComponent(obs)+'&decision='+encodeURIComponent(dec))
+  .then(function(r){
+    if(r.ok){alert('✅ Expediente exportado a SharePoint.');}
+    else{r.text().then(function(msg){alert('❌ Error al exportar:\n'+(msg||'Revise la conexión a SharePoint y la ruta de exportación en argos_config.json'));});}
+  })
+  .catch(function(){alert('❌ Motor ARC offline. Verifique que argos_maestro_clientes.py esté corriendo.');})
+  .finally(function(){if(btn){btn.disabled=false;btn.textContent='📄 Exportar Expediente';}});
+}
+function renderAll(){
+var rows=filterRows();var total=rows.length;var alto=0,medio=0,bajo=0;
+rows.forEach(function(r){var v=r[14];if(v===1)alto++;else if(v===2)medio++;else bajo++;});
+document.getElementById('status-bar').textContent='ARC · '+fmt(total)+' clientes · '+fmt(alto)+' ALTO · '+fmt(medio)+' MEDIO · '+fmt(bajo)+' BAJO';
+document.getElementById('h-alto').textContent='ALTO: '+fmt(alto);
+document.getElementById('h-total').textContent=fmt(total)+' clientes'+(activeSociety!=='all'?' · '+activeSociety:'');
+var kr=document.getElementById('kpi-resumen');
+kr.innerHTML='<div class="kpi k-navy"><div class="kpi-label">TOTAL CLIENTES</div><div class="kpi-val">'+fmt(total)+'</div></div>'
++'<div class="kpi k-alto"><div class="kpi-label">RIESGO ALTO</div><div class="kpi-val" style="color:var(--alto)">'+fmt(alto)+'</div><div class="kpi-sub">'+((total?alto/total*100:0).toFixed(1))+'%</div></div>'
++'<div class="kpi k-medio"><div class="kpi-label">RIESGO MEDIO</div><div class="kpi-val" style="color:var(--medio)">'+fmt(medio)+'</div></div>'
++'<div class="kpi k-bajo"><div class="kpi-label">RIESGO BAJO</div><div class="kpi-val" style="color:var(--teal)">'+fmt(bajo)+'</div></div>'
++'<div class="kpi k-teal"><div class="kpi-label">REP. DUPLICADOS</div><div class="kpi-val">'+(B.ra?B.ra.length:0)+'</div></div>';
+var dKeys=Object.keys(arcDecs);var conf=dKeys.filter(function(k){return arcDecs[k]==='Confirmado';}).length;var desc=dKeys.filter(function(k){return arcDecs[k]==='Descartado';}).length;var gTotal=B.meta?B.meta.total:total;var pend=Math.max(0,gTotal-conf-desc);var pC=gTotal?conf/gTotal*100:0;var pD=gTotal?desc/gTotal*100:0;document.getElementById('arc-mgmt-conf-bar').style.width=pC+'%';document.getElementById('arc-mgmt-desc-bar').style.width=pD+'%';document.getElementById('arc-mgmt-conf-lbl').textContent='Confirmados: '+conf;document.getElementById('arc-mgmt-desc-lbl').textContent='Descartados: '+desc;document.getElementById('arc-mgmt-pend-lbl').textContent='Pendientes: '+pend;document.getElementById('arc-mgmt-pct').textContent=gTotal?((conf+desc)/gTotal*100).toFixed(0)+'% gestionado':'';var insEl=document.getElementById('arc-insight');var ins='';if(pend===0&&gTotal>0){ins='<strong>Proceso completo.</strong> Todos los '+gTotal+' expedientes han sido gestionados: '+conf+' confirmados y '+desc+' descartados.';}else if(alto>0){ins='De los <strong>'+total+'</strong> clientes visibles, <strong>'+alto+'</strong> ('+(total?alto/total*100:0).toFixed(1)+'%) son de riesgo ALTO. Quedan <strong>'+pend+'</strong> expediente'+(pend!==1?'s':'')+' pendiente'+(pend!==1?'s':'')+' de decisión.';}else{ins='No hay clientes con riesgo ALTO en la selección actual. Quedan <strong>'+pend+'</strong> expediente'+(pend!==1?'s':'')+' pendiente'+(pend!==1?'s':'')+' de revisión.';}insEl.innerHTML=ins;
+mkChart('c-donut','doughnut',{labels:['Alto','Medio','Bajo'],datasets:[{data:[alto,medio,bajo],backgroundColor:[C.Alto,C.Medio,C.Bajo],borderWidth:2,borderColor:'#fff'}]},{cutout:'65%',onClick:function(e,el){if(!el.length)return;var rMap=['ALTO','MEDIO','BAJO'];var cls=['.chip-a','.chip-m','.chip-b'];var i=el[0].index;var chip=document.querySelector(cls[i]);if(chip)toggleRisk(rMap[i],chip);},onHover:function(e,el){if(e.native)e.native.target.style.cursor=el.length?'pointer':'default';}});
+var ac_live=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];rows.forEach(function(r){for(var i=0;i<5;i++){var v=r[8+i];if(v===1)ac_live[0][i]++;else if(v===2)ac_live[1][i]++;}});var ac=ac_live;
+var aNames=['A1:Pago','A2:CIIU','A3:Rep.','A4:Reciente','A5:País'];
+mkChart('c-alertas','bar',{labels:aNames,datasets:[{label:'Alto',data:ac[0],backgroundColor:C.Alto},{label:'Medio',data:ac[1],backgroundColor:C.Medio}]},{scales:{x:{grid:{display:false}},y:{grid:{color:'#d8e5ef'}}}});
+var paaMap={};rows.forEach(function(r){var pa=B.pa[r[2]]||'';if(!pa)return;if(!paaMap[pa])paaMap[pa]=[pa,0,0];var v=r[14];if(v===1)paaMap[pa][1]++;else if(v===2)paaMap[pa][2]++;});var paa=Object.values(paaMap).sort(function(a,b){return b[1]-a[1];}).slice(0,15);
+mkChart('c-paises','bar',{labels:paa.map(function(p){return p[0]}),datasets:[{label:'Alto',data:paa.map(function(p){return p[1]}),backgroundColor:C.Alto},{label:'Medio',data:paa.map(function(p){return p[2]}),backgroundColor:C.Medio}]},{indexAxis:'y',scales:{x:{grid:{color:'#d8e5ef'}},y:{grid:{display:false}}}});
+var sa=B.sa||[];var saTop=sa.slice(0,10);
+var bgA=saTop.map(function(s){return activeSociety==='all'||activeSociety===s[0]?C.Alto:'rgba(232,54,93,0.25)';});
+var bgM=saTop.map(function(s){return activeSociety==='all'||activeSociety===s[0]?C.Medio:'rgba(212,134,10,0.25)';});
+var bgB=saTop.map(function(s){return activeSociety==='all'||activeSociety===s[0]?C.Bajo:'rgba(0,169,157,0.25)';});
+mkChart('c-sociedad','bar',{labels:saTop.map(function(s){return s[0]}),datasets:[{label:'Alto',data:saTop.map(function(s){return s[2]}),backgroundColor:bgA},{label:'Medio',data:saTop.map(function(s){return s[3]}),backgroundColor:bgM},{label:'Bajo',data:saTop.map(function(s){return s[4]}),backgroundColor:bgB}]},{scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#d8e5ef'}}}});
+var ka=document.getElementById('kpi-alertas');
+var aLabels=['A1: Cond. Pago','A2: CIIU','A3: Rep. Dup.','A4: Empresa Reciente','A5: Riesgo País'];
+ka.innerHTML='';for(var i=0;i<5;i++){ka.innerHTML+='<div class="kpi k-alto"><div class="kpi-label">'+aLabels[i]+'</div><div class="kpi-val">'+fmt(ac[0][i]+ac[1][i])+'</div><div class="kpi-sub">'+fmt(ac[0][i])+' ALTO · '+fmt(ac[1][i])+' MEDIO</div></div>';}
+mkChart('c-freq','bar',{labels:aNames,datasets:[{label:'Total activaciones',data:aNames.map(function(_,i){return ac[0][i]+ac[1][i]}),backgroundColor:[C.Alto,C.Medio,C.Bajo,C.navy,'#5e4fc9']}]},{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#d8e5ef'}}}});
+var cb=B.cb||[];
+mkChart('c-combo','bar',{labels:cb.map(function(c){return c[0].split('').map(function(v,i){return v==='1'?aNames[i]:''}).filter(Boolean).join('+')}),datasets:[{label:'Clientes',data:cb.map(function(c){return c[1]}),backgroundColor:C.Alto}]},{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#d8e5ef'}},y:{grid:{display:false}}}});
+var tbody=document.getElementById('tbl-clientes');tbody.innerHTML='';
+var kc=document.getElementById('kpi-clientes');
+var totalFiltrados=rows.length;var limitTabla=Math.min(totalFiltrados,200);
+var msgLimite=totalFiltrados>200?'<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--medio);padding:6px 0">⚠ Mostrando '+limitTabla+' de '+fmt(totalFiltrados)+' clientes. Use los filtros para reducir los resultados.</div>':'';
+kc.innerHTML='<div class="kpi k-navy"><div class="kpi-label">CLIENTES FILTRADOS</div><div class="kpi-val">'+fmt(totalFiltrados)+'</div></div>'+msgLimite;
+rows.slice(0,200).forEach(function(r,idx){
+var rz=B.rz[r[1]]||'';var pa=B.pa[r[2]]||'';var so=B.so[r[3]]||'';var code=r[0];
+var dec=arcDecs[code]||'';var estH=dec==='Confirmado'?'<span class="badge b-alto">✅</span>':dec==='Descartado'?'<span class="badge b-bajo">🚫</span>':'<span style="color:var(--text-3);font-size:10px">⏳</span>';
+var sel=arcSel===code?' style="background:rgba(0,169,157,0.08)"':'';
+tbody.innerHTML+='<tr'+sel+' onclick="openArcDD(\''+code+'\',\''+rz.replace(/'/g,"\\'")+'\',B.tc['+B.tc.indexOf(r)+'])" style="cursor:pointer;'+(sel?'background:rgba(0,169,157,0.08)':'')+'">'
++'<td style="font-family:DM Mono,monospace;color:var(--text-3);font-size:10px">'+(idx+1)+'</td>'
++'<td style="font-family:DM Mono,monospace;font-size:10px">'+code+'</td>'
++'<td style="font-weight:600;max-width:200px;white-space:normal">'+rz+'</td>'
++'<td>'+pa+'</td><td>'+so+'</td>'
++'<td style="font-family:DM Mono,monospace">'+r[4]+'d</td>'
++'<td style="font-family:DM Mono,monospace;font-size:10px">'+r[5]+'</td>'
++'<td>'+dotH(r[8])+'</td><td>'+dotH(r[9])+'</td><td>'+dotH(r[10])+'</td><td>'+dotH(r[11])+'</td><td>'+dotH(r[12])+'</td>'
++'<td style="font-family:DM Mono,monospace;font-weight:700">'+r[13]+'</td>'
++'<td>'+badgeH(r[14])+'</td><td>'+estH+'</td><td style="font-size:10px;color:var(--teal);font-weight:600">👆 Ver</td></tr>';
+});
+var ts=document.getElementById('tbl-soc');ts.innerHTML='';
+(B.sa||[]).forEach(function(s){var isA=activeSociety===s[0];ts.innerHTML+='<tr onclick="toggleSociety(\''+s[0]+'\')" style="cursor:pointer;'+(isA?'background:rgba(26,58,107,0.06);':'')+'" title="Clic para filtrar por '+(s[1]||s[0])+'"><td style="font-family:DM Mono,monospace;font-weight:700;color:'+(isA?'var(--navy)':'inherit')+'">'+s[0]+'</td><td style="font-weight:'+(isA?'700':'400')+'">'+s[1]+'</td><td style="color:var(--alto);font-weight:700">'+s[2]+'</td><td style="color:var(--medio)">'+s[3]+'</td><td style="color:var(--teal)">'+s[4]+'</td><td style="font-weight:700">'+s[5]+'</td></tr>';});
+var tr2=document.getElementById('tbl-rep');tr2.innerHTML='';
+(B.ra||[]).forEach(function(r){tr2.innerHTML+='<tr><td style="font-weight:600">'+r[1]+'</td><td style="font-family:DM Mono,monospace;font-weight:700">'+r[2]+'</td><td style="color:var(--alto)">'+r[3]+'</td><td style="color:var(--medio)">'+r[4]+'</td><td style="color:var(--teal)">'+r[5]+'</td></tr>';});
+}
+(function(){if(B&&B.meta){renderSocietyChips();renderAll();}else{document.getElementById('status-bar').textContent='Error: sin datos. Verifique que argos_maestro_clientes.py este corriendo.';}})();
+</script></body></html>
